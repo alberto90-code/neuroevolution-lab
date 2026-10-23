@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - "train.py"
+      - "quality_gate.py"
+      - "tests/**"
       - "requirements.txt"
       - ".github/workflows/train.yml"
 jobs:
@@ -19,9 +21,13 @@ jobs:
           python-version: "3.11"
           cache: pip
       - run: pip install -r requirements.txt
+      - run: python -m unittest discover -s tests -v
       - run: python train.py
+      - run: python quality_gate.py
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: model-results
           path: artifacts/
+          if-no-files-found: warn
           retention-days: 14
