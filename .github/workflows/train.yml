@@ -1,0 +1,27 @@
+name: Neural network experiment
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "train.py"
+      - "requirements.txt"
+      - ".github/workflows/train.yml"
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: python train.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: model-results
+          path: artifacts/
+          retention-days: 14
