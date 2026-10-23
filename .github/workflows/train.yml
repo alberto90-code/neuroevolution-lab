@@ -1,6 +1,8 @@
 name: Neural network experiment
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '17 3 * * 1'
   push:
     paths:
       - "train.py"
