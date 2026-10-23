@@ -46,20 +46,20 @@ def train_width(width):
                 best_params = [p.copy() for p in params]
     for p, saved in zip(params, best_params):
         p[:] = saved
-    return best, best_params, mse
+    return best, best_params, mse(Xt, yt)
 
 candidates = []
 winner = None
 for width in (8, 16, 32):
-    val, weights, mse = train_width(width)
+    val, weights, test_mse = train_width(width)
     candidates.append({"hidden_width": width, "validation_mse": val})
     if winner is None or val < winner["validation_mse"]:
         winner = {"hidden_width": width, "validation_mse": val,
-                  "weights": weights, "mse": mse}
+                  "weights": weights, "test_mse": test_mse}
 np.savez(out/"best_weights.npz",
          **dict(zip(("W1", "b1", "W2", "b2"), winner["weights"])))
 results = {"seed": SEED, "best_validation_mse": winner["validation_mse"],
-           "test_mse": winner["mse"](Xt, yt),
+           "test_mse": winner["test_mse"],
            "best_hidden_width": winner["hidden_width"],
            "candidates": candidates}
 (out/"metrics.json").write_text(json.dumps(results, indent=2) + "\n")
