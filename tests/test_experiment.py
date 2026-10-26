@@ -37,6 +37,22 @@ class ExperimentTests(unittest.TestCase):
                                @ weights["W2"] + weights["b2"])
                 checkpoint_mse = float(np.mean((predictions - test_targets) ** 2))
                 self.assertAlmostEqual(checkpoint_mse, data["test_mse"], places=12)
+                validation_inputs = inputs[1200:1500]
+                validation_targets = validation_inputs[:, :1] * validation_inputs[:, 1:2]
+                validation_predictions = (
+                    np.tanh(validation_inputs @ weights["W1"] + weights["b1"])
+                    @ weights["W2"] + weights["b2"]
+                )
+                checkpoint_validation_mse = float(
+                    np.mean((validation_predictions - validation_targets) ** 2)
+                )
+                self.assertAlmostEqual(
+                    checkpoint_validation_mse, data["best_validation_mse"], places=12
+                )
+                self.assertEqual(
+                    json.loads((artifacts / "history.json").read_text()),
+                    data["candidates"],
+                )
 
 if __name__ == "__main__":
     unittest.main()
