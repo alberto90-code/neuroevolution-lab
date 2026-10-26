@@ -18,7 +18,10 @@ class ExperimentTests(unittest.TestCase):
             data = json.loads((artifacts / "metrics.json").read_text())
             self.assertEqual(data["best_hidden_width"], min(
                 data["candidates"], key=lambda x: x["validation_mse"])["hidden_width"])
-            self.assertEqual(len(data["candidates"]), 3)
+            self.assertEqual(len(data["candidates"]), 9)
+            self.assertEqual(len(json.loads((artifacts / "history.json").read_text())), 9)
+            self.assertEqual(data["best_generation"], min(
+                data["candidates"], key=lambda x: x["validation_mse"])["generation"])
             self.assertGreaterEqual(data["test_mse"], 0)
             import numpy as np
             with np.load(artifacts / "best_weights.npz") as weights:
