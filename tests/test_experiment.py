@@ -54,5 +54,33 @@ class ExperimentTests(unittest.TestCase):
                     data["candidates"],
                 )
 
+
+    def test_repeated_runs_are_reproducible(self):
+        """Identical seeds and code must reproduce metrics and model weights."""
+        import numpy as np
+
+        with tempfile.TemporaryDirectory() as first, tempfile.TemporaryDirectory() as second:
+            for folder in (first, second):
+                subprocess.run(
+                    [sys.executable, str(ROOT / "train.py")],
+                    cwd=folder, check=True, capture_output=True, text=True,
+                    timeout=180,
+                )
+            left = Path(first) / "artifacts"
+            right = Path(second) / "artifacts"
+            self.assertEqual(
+                json.loads((left / "metrics.json").read_text()),
+                json.loads((right / "metrics.json").read_text()),
+            )
+            self.assertEqual(
+                json.loads((left / "history.json").read_text()),
+                json.loads((right / "history.json").read_text()),
+            )
+            with np.load(left / "best_weights.npz") as a, np.load(right / "best_weights.npz") as b:
+                self.assertEqual(set(a.files), set(b.files))
+                for name in a.files:
+                    with self.subTest(weight=name):
+                        np.testing.assert_array_equal(a[name], b[name])
+
 if __name__ == "__main__":
     unittest.main()
