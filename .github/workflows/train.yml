@@ -14,6 +14,9 @@ jobs:
   train:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    # Keep NumPy/OpenBLAS reductions single-threaded across CI runners.
+    env:
+      OPENBLAS_NUM_THREADS: "1"
     permissions:
       contents: read
     steps:
