@@ -10,6 +10,9 @@ def check_metrics(metrics, limit=0.02):
     Validation data controls acceptance; the held-out test metric is
     checked for validity but never used to accept/reject model quality.
     """
+    if (isinstance(limit, bool) or not isinstance(limit, (int, float))
+            or not math.isfinite(limit) or limit < 0):
+        raise ValueError("Quality threshold must be a finite nonnegative number")
     raw_validation = metrics["best_validation_mse"]
     raw_test = metrics["test_mse"]
     if any(isinstance(v, bool) or not isinstance(v, (int, float))
