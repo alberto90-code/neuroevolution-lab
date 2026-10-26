@@ -24,6 +24,20 @@ class QualityGateTests(unittest.TestCase):
                     check_metrics({"best_validation_mse": validation, "test_mse": test})
 
 
+    def test_rejects_invalid_quality_thresholds(self):
+        metrics = {"best_validation_mse": 0.01, "test_mse": 0.5}
+        for limit in (float("nan"), float("inf"), float("-inf"), -0.01,
+                      False, True, "0.02", None):
+            with self.subTest(limit=limit):
+                with self.assertRaises(ValueError):
+                    check_metrics(metrics, limit=limit)
+
+    def test_zero_quality_threshold_is_valid(self):
+        self.assertEqual(
+            check_metrics({"best_validation_mse": 0.0, "test_mse": 0.5}, limit=0),
+            (0.0, 0.5),
+        )
+
     def test_rejects_non_numeric_json_values(self):
         for key in ("best_validation_mse", "test_mse"):
             for value in (False, True, "0.01", None, [], {}):
