@@ -15,7 +15,7 @@ Outputs are written to `artifacts/metrics.json` and `artifacts/best_weights.npz`
 
 ## Evaluation policy
 
-Model selection uses **validation MSE**. The held-out **test MSE** is reported separately and checked against a preliminary threshold of 0.02. The model is not a general-purpose AI; it is a small controlled research example. Repeated scheduled runs with an unchanged seed and code reproduce the same experiment rather than automatically discovering new architectures.
+Model selection uses **validation MSE**. A preliminary quality gate requires **validation MSE** ≤ 0.02. The held-out **test MSE** is reported separately and checked for numeric validity only; it is not used to select or accept a model. The model is not a general-purpose AI; it is a small controlled research example. Repeated scheduled runs with an unchanged seed and code reproduce the same experiment rather than automatically discovering new architectures.
 
 ## Safety and limits
 
