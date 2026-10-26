@@ -24,5 +24,15 @@ class QualityGateTests(unittest.TestCase):
                     check_metrics({"best_validation_mse": validation, "test_mse": test})
 
 
+    def test_rejects_non_numeric_json_values(self):
+        for key in ("best_validation_mse", "test_mse"):
+            for value in (False, True, "0.01", None, [], {}):
+                with self.subTest(metric=key, value=value):
+                    metrics = {"best_validation_mse": 0.01, "test_mse": 0.5}
+                    metrics[key] = value
+                    with self.assertRaises(ValueError):
+                        check_metrics(metrics)
+
+
 if __name__ == "__main__":
     unittest.main()
