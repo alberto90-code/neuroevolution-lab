@@ -1,5 +1,6 @@
 """Compare neural-network widths using a fixed validation split."""
 import json
+import platform
 from pathlib import Path
 import numpy as np
 
@@ -62,7 +63,10 @@ test_predictions = np.tanh(Xt @ W1 + b1) @ W2 + b2
 test_mse = float(np.mean((test_predictions - yt)**2))
 np.savez(out/"best_weights.npz",
          **dict(zip(("W1", "b1", "W2", "b2"), winner["weights"])))
-results = {"seed": SEED, "best_generation": winner["generation"], "best_validation_mse": winner["validation_mse"],
+results = {"seed": SEED, "python_version": platform.python_version(),
+           "numpy_version": np.__version__,
+           "dataset_sizes": {"train": n_train, "validation": n_val, "test": n_test},
+           "best_generation": winner["generation"], "best_validation_mse": winner["validation_mse"],
            "test_mse": test_mse,
            "best_hidden_width": winner["hidden_width"],
            "candidates": candidates}
