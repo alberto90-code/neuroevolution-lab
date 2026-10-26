@@ -1,5 +1,6 @@
 """Compare neural-network widths using a fixed validation split."""
 import json
+import os
 from pathlib import Path
 import numpy as np
 
@@ -13,8 +14,8 @@ ytr, yv, yt = np.split(y, [n_train, n_train + n_val])
 out = Path("artifacts")
 out.mkdir(exist_ok=True)
 
-def train_width(width):
-    local = np.random.default_rng(SEED + width)
+def train_width(width, generation):
+    local = np.random.default_rng(SEED + width + 1000 * generation)
     W1 = local.normal(0, .35, (2, width))
     b1 = np.zeros((1, width))
     W2 = local.normal(0, .35, (width, 1))
@@ -50,17 +51,19 @@ def train_width(width):
 
 candidates = []
 winner = None
-for width in (8, 16, 32):
-    val, weights, test_mse = train_width(width)
-    candidates.append({"hidden_width": width, "validation_mse": val})
+for generation in range(3):
+  for width in (8, 16, 32):
+    val, weights, test_mse = train_width(width, generation)
+    candidates.append({"generation": generation, "hidden_width": width, "validation_mse": val})
     if winner is None or val < winner["validation_mse"]:
-        winner = {"hidden_width": width, "validation_mse": val,
+        winner = {"generation": generation, "hidden_width": width, "validation_mse": val,
                   "weights": weights, "test_mse": test_mse}
 np.savez(out/"best_weights.npz",
          **dict(zip(("W1", "b1", "W2", "b2"), winner["weights"])))
-results = {"seed": SEED, "best_validation_mse": winner["validation_mse"],
+results = {"seed": SEED, "best_generation": winner["generation"], "best_validation_mse": winner["validation_mse"],
            "test_mse": winner["test_mse"],
            "best_hidden_width": winner["hidden_width"],
            "candidates": candidates}
+(out/"history.json").write_text(json.dumps(candidates, indent=2) + "\n")
 (out/"metrics.json").write_text(json.dumps(results, indent=2) + "\n")
 print(json.dumps(results, indent=2))
