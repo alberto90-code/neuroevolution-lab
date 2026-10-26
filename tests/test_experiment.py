@@ -29,6 +29,14 @@ class ExperimentTests(unittest.TestCase):
                                  (2, data["best_hidden_width"]))
                 self.assertTrue(all(np.isfinite(weights[k]).all()
                                     for k in ("W1", "b1", "W2", "b2")))
+                rng = np.random.default_rng(data["seed"])
+                inputs = rng.uniform(-1, 1, (1800, 2))
+                test_inputs = inputs[1500:]
+                test_targets = test_inputs[:, :1] * test_inputs[:, 1:2]
+                predictions = (np.tanh(test_inputs @ weights["W1"] + weights["b1"])
+                               @ weights["W2"] + weights["b2"])
+                checkpoint_mse = float(np.mean((predictions - test_targets) ** 2))
+                self.assertAlmostEqual(checkpoint_mse, data["test_mse"], places=12)
 
 if __name__ == "__main__":
     unittest.main()
