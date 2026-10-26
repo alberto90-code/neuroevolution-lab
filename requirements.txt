@@ -1,3 +1,5 @@
 # Pinned to the NumPy version verified by GitHub Actions run 40268335753.
 # Keep this fixed so scheduled runs do not silently change numerical dependencies.
 numpy==2.4.6
+# Used by numpy.show_runtime() to report loaded BLAS libraries and thread counts.
+threadpoolctl==3.6.0
