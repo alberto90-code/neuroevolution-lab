@@ -63,7 +63,7 @@ class QualityGateTests(unittest.TestCase):
 
 
     def test_near_threshold_failure_shows_actual_values(self):
-        with self.assertRaisesRegex(ValueError, r"0\\.0200001 exceeds 0\\.02"):
+        with self.assertRaisesRegex(ValueError, "0[.]0200001 exceeds 0[.]02"):
             check_metrics({"best_validation_mse": 0.0200001, "test_mse": 0.001},
                           limit=0.02)
 
