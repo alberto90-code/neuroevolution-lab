@@ -16,6 +16,10 @@ class ExperimentTests(unittest.TestCase):
                            timeout=180)
             artifacts = Path(folder) / "artifacts"
             data = json.loads((artifacts / "metrics.json").read_text())
+            self.assertEqual(data["python_version"], __import__("platform").python_version())
+            self.assertEqual(data["numpy_version"], __import__("numpy").__version__)
+            self.assertEqual(data["dataset_sizes"],
+                             {"train": 1200, "validation": 300, "test": 300})
             self.assertEqual(data["best_hidden_width"], min(
                 data["candidates"], key=lambda x: x["validation_mse"])["hidden_width"])
             import numpy as np
