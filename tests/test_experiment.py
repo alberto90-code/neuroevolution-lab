@@ -18,12 +18,29 @@ class ExperimentTests(unittest.TestCase):
             data = json.loads((artifacts / "metrics.json").read_text())
             self.assertEqual(data["best_hidden_width"], min(
                 data["candidates"], key=lambda x: x["validation_mse"])["hidden_width"])
+            import numpy as np
             self.assertEqual(len(data["candidates"]), 9)
+            self.assertEqual(
+                {(item["generation"], item["hidden_width"])
+                 for item in data["candidates"]},
+                {(generation, width)
+                 for generation in range(3) for width in (8, 16, 32)},
+            )
+            self.assertEqual(
+                data["best_validation_mse"],
+                min(item["validation_mse"] for item in data["candidates"]),
+            )
+            self.assertTrue(all(
+                np.isfinite(item["validation_mse"]) and item["validation_mse"] >= 0
+                for item in data["candidates"]
+            ))
+            self.assertTrue(all(
+                "test_mse" not in item for item in data["candidates"]
+            ), "Held-out test scores must not be used for candidate selection")
             self.assertEqual(len(json.loads((artifacts / "history.json").read_text())), 9)
             self.assertEqual(data["best_generation"], min(
                 data["candidates"], key=lambda x: x["validation_mse"])["generation"])
             self.assertGreaterEqual(data["test_mse"], 0)
-            import numpy as np
             with np.load(artifacts / "best_weights.npz") as weights:
                 self.assertEqual(weights["W1"].shape,
                                  (2, data["best_hidden_width"]))
