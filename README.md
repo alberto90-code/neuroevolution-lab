@@ -17,6 +17,10 @@ Outputs are written to `artifacts/metrics.json` and `artifacts/best_weights.npz`
 
 Model selection uses **validation MSE**. A preliminary quality gate requires **validation MSE** ≤ 0.02. The held-out **test MSE** is reported separately and checked for numeric validity only; it is not used to select or accept a model. The model is not a general-purpose AI; it is a small controlled research example. Repeated scheduled runs with an unchanged seed and code reproduce the same experiment rather than automatically discovering new architectures.
 
+## Reproducibility scope
+
+The experiment uses a fixed random seed, pinned Python dependencies, an Ubuntu 24.04 CI runner, and single-threaded OpenBLAS. Tests verify identical metrics and weights across repeated runs in the same environment. **Bit-for-bit agreement across different CI machines is not guaranteed**: runs [#25](https://github.com/alberto90-code/neuroevolution-lab/actions/runs/40322889731) and [#26](https://github.com/alberto90-code/neuroevolution-lab/actions/runs/40331197040) reported slightly different validation and test MSE despite the same training code. CPU/BLAS differences are a possible explanation, not a confirmed root cause. Compare the runtime diagnostics and metrics before interpreting small cross-run changes as model improvements.
+
 ## Safety and limits
 
 Do not commit credentials, tokens, or private data. This repository is currently **public**; change its visibility in GitHub settings if you want private access. There is no automatic cross-run promotion or rollback yet.
