@@ -1,1 +1,3 @@
-numpy>=1.24,<3
+# Pinned to the NumPy version verified by GitHub Actions run 40268335753.
+# Keep this fixed so scheduled runs do not silently change numerical dependencies.
+numpy==2.4.6
