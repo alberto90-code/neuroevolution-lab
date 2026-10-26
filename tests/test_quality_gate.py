@@ -62,6 +62,17 @@ class QualityGateTests(unittest.TestCase):
                     check_metrics(invalid)
 
 
+    def test_adjacent_float_above_limit_reports_exact_value(self):
+        """A just-failing metric must not look equal to its threshold."""
+        import math
+        limit = 0.02
+        validation = math.nextafter(limit, math.inf)
+        with self.assertRaises(ValueError) as caught:
+            check_metrics({"best_validation_mse": validation, "test_mse": 0.001},
+                          limit=limit)
+        self.assertIn(repr(validation), str(caught.exception))
+        self.assertIn(repr(limit), str(caught.exception))
+
     def test_near_threshold_failure_shows_actual_values(self):
         with self.assertRaisesRegex(ValueError, "0[.]0200001 exceeds 0[.]02"):
             check_metrics({"best_validation_mse": 0.0200001, "test_mse": 0.001},
