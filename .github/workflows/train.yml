@@ -14,9 +14,11 @@ jobs:
   train:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
-    # Keep NumPy/OpenBLAS reductions single-threaded across CI runners.
+    # Keep OpenBLAS single-threaded and use the same kernel on Haswell/SkylakeX runners.
+    # This reduces one known source of cross-run MSE drift; it is not a bitwise guarantee.
     env:
       OPENBLAS_NUM_THREADS: "1"
+      OPENBLAS_CORETYPE: "Haswell"
     permissions:
       contents: read
     steps:
