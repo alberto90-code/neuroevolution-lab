@@ -48,5 +48,19 @@ class QualityGateTests(unittest.TestCase):
                         check_metrics(metrics)
 
 
+    def test_rejects_oversized_integer_values(self):
+        """JSON integers too large for float must fail closed with ValueError."""
+        oversized = 10 ** 400
+        metrics = {"best_validation_mse": 0.01, "test_mse": 0.5}
+        with self.assertRaises(ValueError):
+            check_metrics(metrics, limit=oversized)
+        for key in metrics:
+            with self.subTest(metric=key):
+                invalid = dict(metrics)
+                invalid[key] = oversized
+                with self.assertRaises(ValueError):
+                    check_metrics(invalid)
+
+
 if __name__ == "__main__":
     unittest.main()
