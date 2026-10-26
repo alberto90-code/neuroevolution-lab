@@ -1,6 +1,5 @@
 """Compare neural-network widths using a fixed validation split."""
 import json
-import os
 from pathlib import Path
 import numpy as np
 
@@ -47,21 +46,24 @@ def train_width(width, generation):
                 best_params = [p.copy() for p in params]
     for p, saved in zip(params, best_params):
         p[:] = saved
-    return best, best_params, mse(Xt, yt)
+    return best, best_params
 
 candidates = []
 winner = None
 for generation in range(3):
   for width in (8, 16, 32):
-    val, weights, test_mse = train_width(width, generation)
+    val, weights = train_width(width, generation)
     candidates.append({"generation": generation, "hidden_width": width, "validation_mse": val})
     if winner is None or val < winner["validation_mse"]:
         winner = {"generation": generation, "hidden_width": width, "validation_mse": val,
-                  "weights": weights, "test_mse": test_mse}
+                  "weights": weights}
+W1, b1, W2, b2 = winner["weights"]
+test_predictions = np.tanh(Xt @ W1 + b1) @ W2 + b2
+test_mse = float(np.mean((test_predictions - yt)**2))
 np.savez(out/"best_weights.npz",
          **dict(zip(("W1", "b1", "W2", "b2"), winner["weights"])))
 results = {"seed": SEED, "best_generation": winner["generation"], "best_validation_mse": winner["validation_mse"],
-           "test_mse": winner["test_mse"],
+           "test_mse": test_mse,
            "best_hidden_width": winner["hidden_width"],
            "candidates": candidates}
 (out/"history.json").write_text(json.dumps(candidates, indent=2) + "\n")
