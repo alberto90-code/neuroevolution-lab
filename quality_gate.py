@@ -10,8 +10,12 @@ def check_metrics(metrics, limit=0.02):
     Validation data controls acceptance; the held-out test metric is
     checked for validity but never used to accept/reject model quality.
     """
-    validation = float(metrics["best_validation_mse"])
-    test = float(metrics["test_mse"])
+    raw_validation = metrics["best_validation_mse"]
+    raw_test = metrics["test_mse"]
+    if any(isinstance(v, bool) or not isinstance(v, (int, float))
+           for v in (raw_validation, raw_test)):
+        raise ValueError("Error metrics must be JSON numbers (not booleans or strings)")
+    validation, test = float(raw_validation), float(raw_test)
     if not all(math.isfinite(v) and v >= 0 for v in (validation, test)):
         raise ValueError("Error metrics must be finite and nonnegative")
     if validation > limit:
