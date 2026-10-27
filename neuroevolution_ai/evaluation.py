@@ -23,6 +23,10 @@ def select_candidate(candidates: list[Candidate]) -> Candidate:
         for field in (candidate.validation_score, candidate.test_score, candidate.cost):
             if isinstance(field, bool) or not isinstance(field, (int, float)):
                 raise ValueError("scores and costs must be numbers")
-            if not math.isfinite(field) or field < 0:
+            try:
+                finite = math.isfinite(field)
+            except OverflowError as exc:
+                raise ValueError("scores and costs must be finite and nonnegative") from exc
+            if not finite or field < 0:
                 raise ValueError("scores and costs must be finite and nonnegative")
     return min(candidates, key=lambda c: (-c.validation_score, c.name))
