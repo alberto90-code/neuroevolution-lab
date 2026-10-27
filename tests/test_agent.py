@@ -70,6 +70,22 @@ class AgentTests(unittest.TestCase):
     def test_prompt_limit_constant(self):
         self.assertGreaterEqual(MAX_PROMPT_CHARS, MAX_TASK_CHARS)
 
+    def test_combined_prompt_limit_before_second_model_call(self):
+        class CountingModel:
+            calls = 0
+
+            def respond(self, prompt):
+                self.calls += 1
+                if self.calls == 1:
+                    return "TOOL: echo | ok"
+                self.fail("model must not receive an oversized prompt")
+
+        model = CountingModel()
+        with self.assertRaisesRegex(ValueError, "agent prompt exceeds size limit"):
+            run_agent(model, "x" * MAX_TASK_CHARS,
+                      {"echo": lambda _: "y" * 4000}, max_steps=2)
+        self.assertEqual(model.calls, 1)
+
     def test_model_response_at_limit(self):
         response = "FINAL: " + "x" * (MAX_RESPONSE_CHARS - len("FINAL: "))
         answer, _ = run_agent(ScriptedModel([response]), "task", {})
