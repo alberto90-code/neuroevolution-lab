@@ -18,6 +18,10 @@ def check_metrics(metrics, limit=0.02):
         raise ValueError("Quality threshold must be a finite nonnegative number") from exc
     if not math.isfinite(limit) or limit < 0:
         raise ValueError("Quality threshold must be a finite nonnegative number")
+    if not isinstance(metrics, dict) or not all(
+        key in metrics for key in ("best_validation_mse", "test_mse")
+    ):
+        raise ValueError("Metrics must be an object containing best_validation_mse and test_mse")
     raw_validation = metrics["best_validation_mse"]
     raw_test = metrics["test_mse"]
     if any(isinstance(v, bool) or not isinstance(v, (int, float))
