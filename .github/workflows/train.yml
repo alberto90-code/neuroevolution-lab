@@ -14,6 +14,9 @@ jobs:
   train:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
+    concurrency:
+      group: neural-experiment-${{ github.ref }}
+      cancel-in-progress: false
     # Keep OpenBLAS single-threaded and use the same kernel on Haswell/SkylakeX runners.
     # This reduces one known source of cross-run MSE drift; it is not a bitwise guarantee.
     env:
