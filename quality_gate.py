@@ -18,8 +18,11 @@ def check_metrics(metrics, limit=0.02):
         raise ValueError("Quality threshold must be a finite nonnegative number") from exc
     if not math.isfinite(limit) or limit < 0:
         raise ValueError("Quality threshold must be a finite nonnegative number")
-    raw_validation = metrics["best_validation_mse"]
-    raw_test = metrics["test_mse"]
+    try:
+        raw_validation = metrics["best_validation_mse"]
+        raw_test = metrics["test_mse"]
+    except (KeyError, TypeError) as exc:
+        raise ValueError("Metrics must contain best_validation_mse and test_mse") from exc
     if any(isinstance(v, bool) or not isinstance(v, (int, float))
            for v in (raw_validation, raw_test)):
         raise ValueError("Error metrics must be JSON numbers (not booleans or strings)")
