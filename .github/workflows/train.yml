@@ -8,6 +8,7 @@ on:
       - "train.py"
       - "quality_gate.py"
       - "tests/**"
+      - "neuroevolution_ai/**"
       - "requirements.txt"
       - ".github/workflows/train.yml"
 jobs:
