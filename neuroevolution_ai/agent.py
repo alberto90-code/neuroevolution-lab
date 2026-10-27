@@ -4,7 +4,7 @@ from typing import Callable, Protocol
 
 MAX_TASK_CHARS = 16_000
 MAX_RESPONSE_CHARS = 8_192
-MAX_PROMPT_CHARS = 24_000
+MAX_PROMPT_CHARS = 20_000
 
 
 class Model(Protocol):
