@@ -4,6 +4,7 @@ from typing import Callable, Protocol
 
 MAX_TASK_CHARS = 16_000
 MAX_RESPONSE_CHARS = 8_192
+MAX_PROMPT_CHARS = 24_000
 
 
 class Model(Protocol):
@@ -33,6 +34,8 @@ def run_agent(model: Model, task: str, tools: dict[str, Callable[[str], str]],
     transcript = [Step("task", task)]
     prompt = task
     for _ in range(max_steps):
+        if len(prompt) > MAX_PROMPT_CHARS:
+            raise ValueError("agent prompt exceeds size limit")
         response = model.respond(prompt)
         if not isinstance(response, str):
             raise TypeError("model response must be text")
