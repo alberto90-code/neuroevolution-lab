@@ -1,6 +1,6 @@
 """Offline tests for the bounded agent core."""
 import unittest
-from neuroevolution_ai.agent import MAX_RESPONSE_CHARS, MAX_TASK_CHARS, run_agent
+from neuroevolution_ai.agent import MAX_PROMPT_CHARS, MAX_RESPONSE_CHARS, MAX_TASK_CHARS, run_agent
 
 
 class ScriptedModel:
@@ -53,6 +53,22 @@ class AgentTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "model response exceeds size limit"):
             run_agent(ScriptedModel([response]), "task", {"echo": called.append})
         self.assertEqual(called, [])
+
+    def test_reject_growing_prompt_before_next_model_call(self):
+        class CountingModel:
+            calls = 0
+
+            def respond(self, prompt):
+                self.calls += 1
+                return "TOOL: echo | x"
+
+        model = CountingModel()
+        with self.assertRaisesRegex(ValueError, "agent prompt exceeds size limit"):
+            run_agent(model, "task", {"echo": lambda arg: "z" * 4000}, max_steps=10)
+        self.assertLess(model.calls, 10)
+
+    def test_prompt_limit_constant(self):
+        self.assertGreaterEqual(MAX_PROMPT_CHARS, MAX_TASK_CHARS)
 
     def test_model_response_at_limit(self):
         response = "FINAL: " + "x" * (MAX_RESPONSE_CHARS - len("FINAL: "))
