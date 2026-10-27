@@ -1,6 +1,6 @@
 """Offline tests for the bounded agent core."""
 import unittest
-from neuroevolution_ai.agent import run_agent
+from neuroevolution_ai.agent import MAX_RESPONSE_CHARS, MAX_TASK_CHARS, run_agent
 
 
 class ScriptedModel:
@@ -37,6 +37,23 @@ class AgentTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             run_agent(ScriptedModel([]), "task", {}, max_steps=True)
 
+
+
+    def test_reject_oversized_task(self):
+        with self.assertRaisesRegex(ValueError, "task exceeds size limit"):
+            run_agent(ScriptedModel([]), "x" * (MAX_TASK_CHARS + 1), {})
+
+    def test_reject_oversized_model_response_before_tool_call(self):
+        called = []
+        response = "TOOL: echo | " + "x" * MAX_RESPONSE_CHARS
+        with self.assertRaisesRegex(ValueError, "model response exceeds size limit"):
+            run_agent(ScriptedModel([response]), "task", {"echo": called.append})
+        self.assertEqual(called, [])
+
+    def test_model_response_at_limit(self):
+        response = "FINAL: " + "x" * (MAX_RESPONSE_CHARS - len("FINAL: "))
+        answer, _ = run_agent(ScriptedModel([response]), "task", {})
+        self.assertEqual(answer, "x" * (MAX_RESPONSE_CHARS - len("FINAL: ")))
 
 if __name__ == "__main__":
     unittest.main()
