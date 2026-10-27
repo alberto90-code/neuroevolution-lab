@@ -54,18 +54,21 @@ class AgentTests(unittest.TestCase):
             run_agent(ScriptedModel([response]), "task", {"echo": called.append})
         self.assertEqual(called, [])
 
-    def test_reject_growing_prompt_before_next_model_call(self):
-        class CountingModel:
-            calls = 0
+    def test_repeated_tool_calls_keep_prompt_bounded(self):
+        class RecordingModel:
+            def __init__(self):
+                self.prompts = []
 
             def respond(self, prompt):
-                self.calls += 1
+                self.prompts.append(prompt)
                 return "TOOL: echo | x"
 
-        model = CountingModel()
-        with self.assertRaisesRegex(ValueError, "agent prompt exceeds size limit"):
+        model = RecordingModel()
+        with self.assertRaisesRegex(RuntimeError, "step budget exhausted"):
             run_agent(model, "task", {"echo": lambda arg: "z" * 4000}, max_steps=10)
-        self.assertLess(model.calls, 10)
+        self.assertEqual(len(model.prompts), 10)
+        self.assertTrue(all(len(prompt) <= MAX_PROMPT_CHARS for prompt in model.prompts))
+        self.assertEqual(len(model.prompts[-1]), len(model.prompts[-2]))
 
     def test_prompt_limit_constant(self):
         self.assertGreaterEqual(MAX_PROMPT_CHARS, MAX_TASK_CHARS)
