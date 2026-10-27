@@ -17,8 +17,8 @@ def select_candidate(candidates: list[Candidate]) -> Candidate:
         raise ValueError("at least one candidate is required")
     seen = set()
     for candidate in candidates:
-        if not candidate.name or candidate.name in seen:
-            raise ValueError("candidate names must be nonempty and unique")
+        if not isinstance(candidate.name, str) or not candidate.name.strip() or candidate.name in seen:
+            raise ValueError("candidate names must be nonempty, unique strings")
         seen.add(candidate.name)
         for field in (candidate.validation_score, candidate.test_score, candidate.cost):
             if isinstance(field, bool) or not isinstance(field, (int, float)):
