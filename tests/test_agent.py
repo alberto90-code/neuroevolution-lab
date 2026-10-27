@@ -78,7 +78,7 @@ class AgentTests(unittest.TestCase):
                 self.calls += 1
                 if self.calls == 1:
                     return "TOOL: echo | ok"
-                self.fail("model must not receive an oversized prompt")
+                raise AssertionError("model must not receive an oversized prompt")
 
         model = CountingModel()
         with self.assertRaisesRegex(ValueError, "agent prompt exceeds size limit"):
