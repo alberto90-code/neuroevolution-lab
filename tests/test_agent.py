@@ -28,6 +28,10 @@ class AgentTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             run_agent(ScriptedModel(["TOOL: shell | rm -rf /"]), "task", {})
 
+    def test_reject_noncallable_allowed_tool(self):
+        with self.assertRaisesRegex(TypeError, "allowed tool must be callable"):
+            run_agent(ScriptedModel(["TOOL: echo | hi"]), "task", {"echo": None})
+
     def test_budget(self):
         with self.assertRaises(RuntimeError):
             run_agent(ScriptedModel(["TOOL: echo | x"] * 3),
