@@ -2,6 +2,9 @@
 from dataclasses import dataclass
 from typing import Callable, Protocol
 
+MAX_TASK_CHARS = 16_000
+MAX_RESPONSE_CHARS = 8_192
+
 
 class Model(Protocol):
     def respond(self, prompt: str) -> str: ...
@@ -18,10 +21,13 @@ def run_agent(model: Model, task: str, tools: dict[str, Callable[[str], str]],
     """Protocol: FINAL: answer or TOOL: name | argument.
 
     Only explicitly supplied tools may run. This function never executes model
-    text as code, opens a network connection, or writes to disk.
+    text as code, opens a network connection, or writes to disk. Input and model
+    output limits prevent unbounded tool arguments and prompt growth.
     """
     if not isinstance(task, str) or not task.strip():
         raise ValueError("task must be nonempty")
+    if len(task) > MAX_TASK_CHARS:
+        raise ValueError("task exceeds size limit")
     if not isinstance(max_steps, int) or isinstance(max_steps, bool) or not 1 <= max_steps <= 20:
         raise ValueError("max_steps must be between 1 and 20")
     transcript = [Step("task", task)]
@@ -30,6 +36,8 @@ def run_agent(model: Model, task: str, tools: dict[str, Callable[[str], str]],
         response = model.respond(prompt)
         if not isinstance(response, str):
             raise TypeError("model response must be text")
+        if len(response) > MAX_RESPONSE_CHARS:
+            raise ValueError("model response exceeds size limit")
         if response.startswith("FINAL:"):
             answer = response[len("FINAL:"):].strip()
             if not answer:
