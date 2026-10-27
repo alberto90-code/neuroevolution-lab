@@ -25,3 +25,9 @@ class EvaluationTests(unittest.TestCase):
             select_candidate([])
         with self.assertRaises(ValueError):
             select_candidate([Candidate('a', 1, 1, 1), Candidate('a', 0, 0, 0)])
+
+    def test_reject_invalid_candidate_names(self):
+        for invalid in (None, 42, " ", ""):
+            with self.subTest(invalid=invalid):
+                with self.assertRaises(ValueError):
+                    select_candidate([Candidate(invalid, 0.8, 0.1, 1)])
