@@ -10,6 +10,14 @@ class QualityGateTests(unittest.TestCase):
             (0.01, 0.5),
         )
 
+    def test_rejects_missing_or_malformed_metrics(self):
+        for metrics in ({}, {"best_validation_mse": 0.01},
+                        {"test_mse": 0.5}, [], None):
+            with self.subTest(metrics=metrics):
+                with self.assertRaisesRegex(
+                        ValueError, "Metrics must contain best_validation_mse and test_mse"):
+                    check_metrics(metrics)
+
     def test_rejects_bad_validation_error(self):
         with self.assertRaises(ValueError):
             check_metrics({"best_validation_mse": 0.03, "test_mse": 0.001})
