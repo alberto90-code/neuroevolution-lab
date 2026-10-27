@@ -4,6 +4,13 @@ from quality_gate import check_metrics
 
 
 class QualityGateTests(unittest.TestCase):
+    def test_rejects_malformed_metric_documents(self):
+        for metrics in (None, [], "metrics", 42, True, {},
+                        {"best_validation_mse": 0.01}, {"test_mse": 0.5}):
+            with self.subTest(metrics=metrics):
+                with self.assertRaisesRegex(ValueError, "must be an object containing"):
+                    check_metrics(metrics)
+
     def test_accepts_valid_metrics(self):
         self.assertEqual(
             check_metrics({"best_validation_mse": 0.01, "test_mse": 0.5}),
