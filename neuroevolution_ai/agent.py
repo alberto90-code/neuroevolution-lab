@@ -51,6 +51,8 @@ def run_agent(model: Model, task: str, tools: dict[str, Callable[[str], str]],
         name = name.strip()
         if not sep or name not in tools:
             raise ValueError("tool is not explicitly allowed")
+        if not callable(tools[name]):
+            raise TypeError("allowed tool must be callable")
         transcript.append(Step("tool", name))
         result = tools[name](argument.strip())
         if not isinstance(result, str):
