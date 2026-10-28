@@ -42,7 +42,8 @@ class AgentTests(unittest.TestCase):
         called = []
         with self.assertRaisesRegex(RuntimeError, "step budget exhausted"):
             run_agent(ScriptedModel(["TOOL: echo | first", "TOOL: echo | second"]),
-                      "task", {"echo": called.append}, max_steps=2)
+                      "task", {"echo": lambda arg: (called.append(arg), "ok")[1]},
+                      max_steps=2)
         self.assertEqual(called, ["first"])
 
     def test_bad_budget(self):
