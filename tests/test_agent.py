@@ -37,6 +37,14 @@ class AgentTests(unittest.TestCase):
             run_agent(ScriptedModel(["TOOL: echo | x"] * 3),
                       "task", {"echo": lambda arg: arg}, max_steps=2)
 
+    def test_last_step_does_not_execute_tool(self):
+        """No tool side effect when no step remains to consume its result."""
+        called = []
+        with self.assertRaisesRegex(RuntimeError, "step budget exhausted"):
+            run_agent(ScriptedModel(["TOOL: echo | first", "TOOL: echo | second"]),
+                      "task", {"echo": called.append}, max_steps=2)
+        self.assertEqual(called, ["first"])
+
     def test_bad_budget(self):
         with self.assertRaises(ValueError):
             run_agent(ScriptedModel([]), "task", {}, max_steps=True)

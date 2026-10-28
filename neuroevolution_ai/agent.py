@@ -33,7 +33,7 @@ def run_agent(model: Model, task: str, tools: dict[str, Callable[[str], str]],
         raise ValueError("max_steps must be between 1 and 20")
     transcript = [Step("task", task)]
     prompt = task
-    for _ in range(max_steps):
+    for step_index in range(max_steps):
         if len(prompt) > MAX_PROMPT_CHARS:
             raise ValueError("agent prompt exceeds size limit")
         response = model.respond(prompt)
@@ -56,6 +56,8 @@ def run_agent(model: Model, task: str, tools: dict[str, Callable[[str], str]],
             raise ValueError("tool is not explicitly allowed")
         if not callable(tools[name]):
             raise TypeError("allowed tool must be callable")
+        if step_index == max_steps - 1:
+            raise RuntimeError("step budget exhausted")
         transcript.append(Step("tool", name))
         result = tools[name](argument.strip())
         if not isinstance(result, str):
