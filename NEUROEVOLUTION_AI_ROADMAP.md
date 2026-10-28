@@ -20,7 +20,7 @@ changes, not unrestricted self-modification.
 ## Phase 1 — safe offline kernel
 - [x] Python model interface, bounded tool loop and trace.
 - [x] Unit tests for tool allowlisting and budget behavior.
-- [ ] Verify tests on the new commit in CI.
+- [x] Verify tests in CI for code commit `a93c7a3` ([run #40632242673](https://github.com/alberto90-code/neuroevolution-lab/actions/runs/40632242673): 38 tests passed, 2026-10-28).
 - [ ] Structured JSON protocol and input/output size budgets.
 - [ ] Tool error handling, redaction, trace persistence (opt-in).
 - [ ] Mock-model benchmark suite with explicit expected results.
