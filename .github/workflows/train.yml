@@ -39,7 +39,9 @@ jobs:
       - run: python train.py
       - run: python quality_gate.py
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6 (Node.js 24)
-        if: always()
+        # Upload partial results after failures, but do not add a second error when none exist.
+        # On successful runs, missing artifacts must still fail the job.
+        if: ${{ always() && (success() || hashFiles('artifacts/**') != '') }}
         with:
           name: model-results
           path: artifacts/
