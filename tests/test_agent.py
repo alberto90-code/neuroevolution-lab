@@ -28,6 +28,16 @@ class AgentTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             run_agent(ScriptedModel(["TOOL: shell | rm -rf /"]), "task", {})
 
+    def test_malformed_tool_requests_never_execute(self):
+        """Malformed tool commands must fail before invoking any allowed tool."""
+        called = []
+        for response in ("TOOL: echo", "TOOL: | argument", "TOOL: other | argument"):
+            with self.subTest(response=response):
+                with self.assertRaisesRegex(ValueError, "tool is not explicitly allowed"):
+                    run_agent(ScriptedModel([response]), "task",
+                              {"echo": lambda argument: called.append(argument)})
+        self.assertEqual(called, [])
+
     def test_reject_noncallable_allowed_tool(self):
         with self.assertRaisesRegex(TypeError, "allowed tool must be callable"):
             run_agent(ScriptedModel(["TOOL: echo | hi"]), "task", {"echo": None})
