@@ -20,6 +20,17 @@ class EvaluationTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     select_candidate([Candidate('a', invalid, 0.5, 1)])
 
+    def test_reject_invalid_test_score_and_cost(self):
+        """All reported fields must be valid even when not used for ranking."""
+        for position in ("test_score", "cost"):
+            for invalid in (float("nan"), float("inf"), -1, True, "0.9"):
+                with self.subTest(field=position, invalid=invalid):
+                    values = {"name": "a", "validation_score": 0.8,
+                              "test_score": 0.5, "cost": 1.0}
+                    values[position] = invalid
+                    with self.assertRaises(ValueError):
+                        select_candidate([Candidate(**values)])
+
     def test_empty_and_duplicate(self):
         with self.assertRaises(ValueError):
             select_candidate([])
