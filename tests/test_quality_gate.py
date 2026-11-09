@@ -87,5 +87,19 @@ class QualityGateTests(unittest.TestCase):
                           limit=0.02)
 
 
+    def test_threshold_boundary_and_held_out_independence(self):
+        """Acceptance uses validation only, including at the exact boundary."""
+        limit = 0.02
+        for test_mse in (0.0, 0.5, 1e100):
+            with self.subTest(test_mse=test_mse):
+                self.assertEqual(
+                    check_metrics({"best_validation_mse": limit,
+                                   "test_mse": test_mse}, limit=limit),
+                    (limit, test_mse),
+                )
+        with self.assertRaises(ValueError):
+            check_metrics({"best_validation_mse": 0.020001,
+                           "test_mse": 0.0}, limit=limit)
+
 if __name__ == "__main__":
     unittest.main()
