@@ -101,5 +101,30 @@ class QualityGateTests(unittest.TestCase):
             check_metrics({"best_validation_mse": 0.020001,
                            "test_mse": 0.0}, limit=limit)
 
+    def test_adjacent_floats_straddle_validation_threshold(self):
+        """The gate must not round a just-failing validation error down."""
+        import math
+        limit = 0.02
+        below = math.nextafter(limit, -math.inf)
+        above = math.nextafter(limit, math.inf)
+        for validation in (below, limit):
+            with self.subTest(validation=validation):
+                self.assertEqual(
+                    check_metrics({"best_validation_mse": validation,
+                                   "test_mse": 1e100}, limit=limit),
+                    (validation, 1e100),
+                )
+        with self.assertRaisesRegex(ValueError, "Validation MSE"):
+            check_metrics({"best_validation_mse": above,
+                           "test_mse": 0.0}, limit=limit)
+
+    def test_nonfinite_test_error_never_passes_even_with_perfect_validation(self):
+        """Held-out error is report-only, but still must be a valid MSE."""
+        for test_mse in (float("nan"), float("inf"), float("-inf")):
+            with self.subTest(test_mse=test_mse):
+                with self.assertRaisesRegex(ValueError, "finite and nonnegative"):
+                    check_metrics({"best_validation_mse": 0.0,
+                                   "test_mse": test_mse})
+
 if __name__ == "__main__":
     unittest.main()
