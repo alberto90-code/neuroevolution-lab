@@ -1,5 +1,6 @@
 name: Neural network experiment
 on:
+  pull_request:
   workflow_dispatch:
   schedule:
     - cron: '17 3 * * 1'
@@ -7,6 +8,7 @@ on:
     paths:
       - "train.py"
       - "quality_gate.py"
+      - "compare_models.py"
       - "tests/**"
       - "neuroevolution_ai/**"
       - "requirements.txt"
