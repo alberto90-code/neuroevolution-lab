@@ -16,7 +16,10 @@ def is_improvement(baseline, candidate, min_relative_gain=0.01):
     """Require a meaningful validation gain; never select using test MSE."""
     if isinstance(min_relative_gain, bool) or not isinstance(min_relative_gain, (int, float)):
         raise ValueError("Gain must be a finite number in [0, 1)")
-    gain = float(min_relative_gain)
+    try:
+        gain = float(min_relative_gain)
+    except OverflowError as exc:
+        raise ValueError("Gain must be a finite number in [0, 1)") from exc
     if not math.isfinite(gain) or not 0 <= gain < 1:
         raise ValueError("Gain must be a finite number in [0, 1)")
     base_val, _ = _validated(baseline)
