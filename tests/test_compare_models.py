@@ -25,7 +25,7 @@ class ComparisonTests(unittest.TestCase):
         for candidate in (metrics(-1), metrics(float("nan")), metrics(0.01, float("inf")), {}):
             with self.subTest(candidate=candidate), self.assertRaises(ValueError):
                 is_improvement(metrics(0.01), candidate)
-        for gain in (-0.1, 1, float("nan"), True, "0.01"):
+        for gain in (-0.1, 1, float("nan"), 10 ** 400, True, "0.01"):
             with self.subTest(gain=gain), self.assertRaises(ValueError):
                 is_improvement(metrics(0.01), metrics(0.009), gain)
 
